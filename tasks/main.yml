@@ -36,15 +36,22 @@
     dest: "{{ local_installation_path }}"
 
 - name: Template Firedancer service
+  become: true
   ansible.builtin.template:
     src: fd.service.j2
     dest: /etc/systemd/system/fd.service
     mode: '644'
+
+- name: Template config.toml
   become: true
+  ansible.builtin.template:
+    src: config.toml.j2
+    dest: /etc/firedancer/config.toml
+    mode: '644'
 
 - name: Enable firedancer service
+  become: true
   ansible.builtin.systemd_service:
     name: fd
     enabled: true
     state: started
-  become: true
