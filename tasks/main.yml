@@ -1,0 +1,50 @@
+- name: Create code path if not exists
+  become: true
+  ansible.builtin.file:
+    path: "{{ code_path }}"
+    state: directory
+    mode: '755'
+    owner: "{{ solana_user }}"
+    group: "{{ solana_user }}"
+
+- name: "Clone repository v{{ solana_version }}"
+  become: true
+  become_user: "{{ solana_user }}"
+  ansible.builtin.git:
+    repo: 'https://github.com/firedancer-io/firedancer.git'
+    dest: "{{ code_path }}/firedancer"
+    force: true
+    version: "v{{ solana_version }}"
+
+- name: Run deps.sh
+  become: true
+  become_user: "{{ solana_user }}"
+  ansible.builtin.shell: "FD_AUTO_INSTALL_PACKAGES=1 {{ code_path }}/firedancer/deps.sh fetch check install"
+
+- name: "Compile {{ solana_version }}"
+  become: true
+  become_user: "{{ solana_user }}"
+  ansible.builtin.shell: "PATH=$PATH:~/.cargo/bin make -j fdctl solana"
+  args:
+    chdir: "{{ code_path }}/firedancer"
+
+- name: Copy binary to $PATH
+  become: true
+  ansible.builtin.copy:
+    remote_src: true
+    src: "{{ code_path }}/firedancer/build/native/gcc/bin/fdctl"
+    dest: "{{ local_installation_path }}"
+
+- name: Template Firedancer service
+  ansible.builtin.template:
+    src: fd.service.j2
+    dest: /etc/systemd/system/fd.service
+    mode: '644'
+  become: true
+
+- name: Enable firedancer service
+  ansible.builtin.systemd_service:
+    name: fd
+    enabled: true
+    state: started
+  become: true
