@@ -16,7 +16,7 @@ solana_user: ubuntu
 # service user to run firedancer as (not created for you!)
 firedancer_service_user: firedancer
 
-# local path to clone repository to
+# remote path to clone repository to on server
 code_path: "/home/{{ solana_user }}/code"
 
 # location to install binary
