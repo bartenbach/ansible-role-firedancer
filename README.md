@@ -1,28 +1,37 @@
-# firedancer
-This role installs and upgrades the firedancer validator.
+firedancer
+=========
+An Ansible role to deploy and upgrade the firedancer validator.
 
-## Prerequisites
-- Create a ledger disk, partition it, set permissions.
-- Create firedancer_service_user
 
-## Role variables
-```yaml
+Requirements
+------------
+This role does not do any disk partitioning or user creation for you, so make sure you have that ready to go before running the role. Those tasks are considered outside the scope of this role.
+
+
+Role Variables
+--------------
+```
 # version of firedancer to install
+# (0.1 points to latest release)
 solana_version: 0.1
 
-# user to SSH as and run playbook
+# remote user to SSH as and run commands
+# (can be different and probably should be than the service user)
 solana_user: ubuntu
 
-# service user to run firedancer as (not created for you!)
+# remote service user to run firedancer as
 firedancer_service_user: firedancer
 
 # remote path to clone repository to on server
 code_path: "/home/{{ solana_user }}/code"
 
-# location to install binary
-local_installation_path: /usr/local/bin
+# remote location to install binary
+remote_installation_path: /usr/local/bin
 
-# config.toml - firedancer validator configuration values
+# config.toml
+# firedancer validator configuration values
+# these are standard validator configuration variables, so if you
+# do not understand them, see Solana documentation.
 ledger: /mnt/ledger
 rpc_port: 8899
 private_rpc: true
@@ -35,3 +44,26 @@ entrypoints:
   - entrypoint2.testnet.solana.com:8001
   - entrypoint3.testnet.solana.com:8001
 ```
+
+Dependencies
+------------
+N/A
+
+Example Playbook
+----------------
+I personally set values in the inventory, but you could certainly
+pass them into the role here if you wanted.
+```
+    - hosts: servers
+      roles:
+         - { role: firedancer }
+```
+
+License
+-------
+
+BSD
+
+Author Information
+------------------
+Blake Bartenbach <blakebartenbach@gmail.com>
